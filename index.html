@@ -8,7 +8,9 @@
 </head>
 <body>
     <!-- 页面盒子 -->
-    <div id="warp">
+    <div id="warp"
+        
+    >
         {{ message }}
         <p class="my-p">
             {{ myPMessage }}
@@ -56,6 +58,7 @@
         <div 
             class="event-class"
             @click="handleFunction"
+            
         >
                 事件监听器
                 <!-- 双向数据绑定: v-model可以获取里表单元素的输入值 -->
@@ -79,8 +82,16 @@
         <div class="computer-class">
             {{ resverseMessage }}
         </div>
-    </div>
 
+        <!-- 组件引入 -->
+        <my-header
+            :todo="myTitle"
+            v-on:handle-children="handleParent"
+        >
+        </my-header>
+
+        
+    </div>
 </body>
 <!-- 引入vue.js -->
 <script src="./js/vue.js"></script>
@@ -88,14 +99,66 @@
 
 <script type="text/javascript">
     //  Vue是构造函数
-    console.log(Vue);
 
+    // Vue 组件系统
+    //  实现子组件向父作用域传递数据
+    Vue.component("my-header", {
+        name: "my-header",
+        template: `
+                    <div>
+                        <div class="my-header-left">
+                            <a href="#" @click="$emit('handle-Children', childrenMessage)">登录</a>
+                            <a href="#">注册</a>
+                        </div>
+                        <div class="my-header-right">
+                            <a href="#">我的</a>
+                            <a href="#" @click="handlePropsData">查看</a>
+                        </div>
+                        <div class="my-header-props">
+                            {{ todo }} 
+                        </div>
+                    </div> 
+                `,
+        data: function () {
+            return {
+                headerMessage: "我是header组件",
+                propsData: "",
+                childrenMessage: "我是子组件的数据",
+                propsDataChildren: null
+            }
+        },
+        methods: {
+            handleLogin: function () {
+                console.log("子组件触发了");
+            },
+            handlePropsData: function () {
+                console.log(this.todo, "todo");
+                //  直接操作props数据，（也就是从父作用域传过来的数据）， 会报错。
+                // this.todo = this.headerMessage;
+                this.propsDataChildren = this.todo;
+                this.propsDataChildren = this.headerMessage;
+                console.log(this.propsDataChildren, "this.propsDataChildren");
+                
+            }
+        },
+        computed: {
+        },
+        // 严格props
+        props: {
+            todo: {
+                type: String,
+                default: ""
+            }
+        }
+    })
+
+    // 再去实例化
     var vm = new Vue ({
         el: "#warp", // el是管理dom节点
         //  data管理数据
         data: function () {
             return {
-                message: "我是warp",
+                message: "欢迎使用vue.js",
                 myPMessage:"我是p标签",
                 myContainer: "我是Container标签",
                 myTitle: "我是title",
@@ -140,6 +203,10 @@
             },
             handleKeyDown: function () {
                 console.log("键盘按下事件")
+            },
+            handleParent: function (data) {
+                console.log(data, "data");
+                this.message = data;
             }
         },
 
@@ -153,21 +220,45 @@
             }
         },
 
-
-
-
-        // watch
+        // watch： 数据监听器, 是对象
         watch: {
             flag: function (oldValue, newValue) {
-                console.log(oldValue, "oldValue",  newValue, "newValue")
-            }
+                console.log(oldValue, "旧值",  newValue, "新值");
+            }            
         },
     });
 
+</script>
+<script>
+    class Person {
+        constructor (name, age) {
+            this.name = name;
+            this.age = age;
+        }
+
+        eat(name) {
+            console.log(this.name);
+        }
+    }
+
+    let personOne = new Person('xyh', 33);
+    personOne.eat();
 
 
+    class Animal extends Person {
+        constructor (name, age, sex) {
+            super(name, age);
+            this.sex = sex;
+        }
+
+        think () {
+            console.log(this.name, this.age, this.sex);
+        }
+    }
+
+    let animal = new Animal ('liudehua', 19, "女");
+    animal.eat();
 
 </script>
-
 
 </html>
